@@ -4,7 +4,7 @@ module.exports.config = {
   permission: 2,
   credits: "SK-SIDDIK",
   description: "Auto-reacts to messages with emojis.",
-  prefix: false,
+  prefix: true,
   premium: false,
   category: "...",
   usages: "",
@@ -27,7 +27,7 @@ module.exports.handleEvent = function({ api, event, client, __GLOBAL }) {
 
 module.exports.run = function({ api, event }) { 
   if (event.body.toLowerCase() === "autoreact on") {
-    enabled = false;
+    enabled = true;
     return api.sendMessage("Auto-React On", event.threadID, event.messageID);
   } else if (event.body.toLowerCase() === "autoreact off") {
     enabled = false;
