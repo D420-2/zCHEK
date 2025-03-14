@@ -13,9 +13,11 @@ module.exports.config = {
   cooldowns: 5
 };
 
+
 module.exports.run = async function ({ api, event, args }) {
   try {
-    const response = await axios.get("https://raw.githubusercontent.com/D0X-R/dj/refs/heads/main/Siddik.json");
+    // JSON ফাইল থেকে ভিডিও লিস্ট লোড করা
+    const response = await axios.get("https://raw.githubusercontent.com/D0X-R/W2W4/refs/heads/main/Siddik.json");
 
     if (!response.data || !response.data.siddik || response.data.siddik.length === 0) {
       return api.sendMessage("⚠️ ভিডিও লিস্ট আনতে সমস্যা হচ্ছে। পরে আবার চেষ্টা করুন।", event.threadID, event.messageID);
@@ -30,6 +32,7 @@ module.exports.run = async function ({ api, event, args }) {
       return api.sendMessage(`❌ অবৈধ পেজ নম্বর! 1 থেকে ${totalPages} এর মধ্যে একটি পেজ নম্বর দিন।`, event.threadID, event.messageID);
     }
 
+    // পেজ অনুযায়ী ভিডিও লিস্ট তৈরি করা
     const startIndex = (page - 1) * itemsPerPage;
     const videosOnPage = videos.slice(startIndex, startIndex + itemsPerPage);
 
@@ -70,14 +73,25 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
   const selectedVideo = handleReply.videos[selectedNumber - 1];
   
   try {
+    // লোডিং মেসেজ পাঠানো
     const loadingMessage = await api.sendMessage("⏳ ভিডিও লোড হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন!", event.threadID);
+
+    // র‌্যান্ডম ভিডিও লিংক নির্বাচন করা
     const videoUrl = selectedVideo.verses[Math.floor(Math.random() * selectedVideo.verses.length)];
 
     console.log("✅ Selected Video URL:", videoUrl); // Debugging
 
+    // ভিডিও স্ট্রিম লোড করা
+    const stream = await global.utils.getStreamFromURL(videoUrl);
+    if (!stream) {
+      console.error("❌ ভিডিও স্ট্রিম পাওয়া যায়নি:", videoUrl);
+      return api.sendMessage("⚠️ ভিডিও লোড করতে ব্যর্থ হয়েছে! দয়া করে পরে চেষ্টা করুন।", event.threadID, event.messageID);
+    }
+
+    // ভিডিও পাঠানো
     api.sendMessage({
       body: `🎥 *𝐒𝐈𝐃𝐃𝐈𝐊 𝐁𝐎𝐓* - ${selectedVideo.name}`,
-      attachment: await global.utils.getStreamFromURL(videoUrl),
+      attachment: stream,
     }, event.threadID, () => api.unsendMessage(loadingMessage.messageID));
 
   } catch (error) {
