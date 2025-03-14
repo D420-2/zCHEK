@@ -1,7 +1,3 @@
-const fs = require("fs-extra");
-const axios = require("axios");
-const jimp = require("jimp");
-
 module.exports.config = {
   name: "mygf",
   version: "1.0.0",
@@ -10,73 +6,83 @@ module.exports.config = {
   description: "Frame pic",
   prefix: true,
   premium: false,
-  category: "png",
+  category: "png", 
   usages: "[@mention]",
   cooldowns: 5,
   dependencies: {
+    "request": "",
     "fs-extra": "",
     "axios": "",
     "jimp": ""
   }
 };
 
-module.exports.run = async ({ event, api }) => {
-  try {
-    const mention = Object.keys(event.mentions);
-    
-    if (mention.length === 0) {
-      return api.sendMessage("🔰 Please Mention Your GF 🔰", event.threadID, event.messageID);
-    }
+module.exports.onLoad = async () => {
+  const { resolve } = global.nodemodule["path"];
+  const { existsSync, mkdirSync } = global.nodemodule["fs-extra"];
+  const { downloadFile } = global.utils;
+  
+  const dirMaterial = resolve(__dirname, "cache", "canvas");
+  const path = resolve(dirMaterial, "sis.png");
 
-    // Selecting the two users for the image
-    const one = mention.length === 1 ? event.senderID : mention[1];
-    const two = mention[0];
-
-    api.sendMessage("⏳ Processing your image, please wait...", event.threadID);
-
-    // Generate the image
-    const imagePath = await generateImage(one, two);
-
-    // Send the image
-    api.sendMessage({
-      body: "⊙────𝚆𝙴𝙻𝙲𝙾𝙼𝙴 𝙼𝚈 𝙶𝙵────⊙",
-      attachment: fs.createReadStream(imagePath)
-    }, event.threadID, () => {
-      fs.unlinkSync(imagePath); // Delete the image after sending
-    });
-
-  } catch (error) {
-    console.error("❌ Error:", error);
-    api.sendMessage(`❌ Error: ${error.message}`, event.threadID);
-  }
+  if (!existsSync(dirMaterial)) mkdirSync(dirMaterial, { recursive: true });
+  if (!existsSync(path)) await downloadFile("https://i.imgur.com/kKlTenx.jpeg", path);
 };
 
-async function generateImage(one, two) {
-  try {
-    console.log("📸 Downloading profile pictures...");
+async function makeImage({ one, two }) {
+  const fs = global.nodemodule["fs-extra"];
+  const path = global.nodemodule["path"];
+  const axios = global.nodemodule["axios"]; 
+  const jimp = global.nodemodule["jimp"];
+  const __root = path.resolve(__dirname, "cache", "canvas");
 
-    const avOne = await jimp.read(`https://graph.facebook.com/${one}/picture?width=512&height=512`);
-    const avTwo = await jimp.read(`https://graph.facebook.com/${two}/picture?width=512&height=512`);
+  let background = await jimp.read(__root + "/sis.png");
+  let outputPath = __root + `/frame_${one}_${two}.png`;
+  let avatarOnePath = __root + `/avt_${one}.png`;
+  let avatarTwoPath = __root + `/avt_${two}.png`;
 
-    console.log("🎨 Applying circular mask...");
-    avOne.circle();
-    avTwo.circle();
+  let avatarOneData = (await axios.get(`https://graph.facebook.com/${one}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
+  let avatarTwoData = (await axios.get(`https://graph.facebook.com/${two}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
 
-    console.log("🖼️ Downloading background image...");
-    const image = await jimp.read("https://i.imgur.com/kKlTenx.jpeg");
+  fs.writeFileSync(avatarOnePath, Buffer.from(avatarOneData));
+  fs.writeFileSync(avatarTwoPath, Buffer.from(avatarTwoData));
 
-    console.log("🔧 Resizing and composing image...");
-    image.resize(1280, 716)
-         .composite(avOne.resize(360, 360), 130, 200)
-         .composite(avTwo.resize(360, 360), 787, 200);
+  let circleOne = await jimp.read(await circle(avatarOnePath));
+  let circleTwo = await jimp.read(await circle(avatarTwoPath));
 
-    const filePath = "./temp/mygf.jpg";
-    await image.writeAsync(filePath);
+  background.resize(1280, 716)
+    .composite(circleOne.resize(360, 360), 130, 200)
+    .composite(circleTwo.resize(360, 360), 787, 200);
 
-    console.log("✅ Image saved successfully:", filePath);
-    return filePath;
-  } catch (error) {
-    console.error("❌ Error in generateImage:", error);
-    throw new Error("Image processing failed.");
-  }
+  let raw = await background.getBufferAsync(jimp.MIME_PNG);
+
+  fs.writeFileSync(outputPath, raw);
+  fs.unlinkSync(avatarOnePath);
+  fs.unlinkSync(avatarTwoPath);
+
+  return outputPath;
 }
+
+async function circle(imagePath) {
+  const jimp = require("jimp");
+  let image = await jimp.read(imagePath);
+  image.circle();
+  return await image.getBufferAsync(jimp.MIME_PNG);
+}
+
+module.exports.run = async function ({ event, api }) {    
+  const fs = global.nodemodule["fs-extra"];
+  const { threadID, messageID, senderID, mentions } = event;
+  const mention = Object.keys(mentions);
+
+  if (!mention[0]) return api.sendMessage("যার সাথে ফ্রেম বানাতে চান তাকে মানশন করুন 😇", threadID, messageID);
+
+  const one = senderID, two = mention[0];
+  
+  return makeImage({ one, two }).then(path => {
+    api.sendMessage({ 
+      body: "=༅༎গরীব ঘরের ছেলেদের হাত ধরার-🩷🍀!!\n\n=༅༎ক্ষমতা সব নারীর থাকেনা-🍀💔!!", 
+      attachment: fs.createReadStream(path) 
+    }, threadID, () => fs.unlinkSync(path), messageID);
+  });
+};
