@@ -4,7 +4,7 @@ module.exports.config = {
   name: "album",
   version: "1.0.0",
   permisson: 0,
-  credits: "SK-SIDDIK",
+  credits: "SK-SIDDIK-KHAN",
   description: "ভিডিও লিস্ট দেখুন এবং বেছে নিন",
   prefix: true,
   premium: false,
@@ -13,10 +13,8 @@ module.exports.config = {
   cooldowns: 5
 };
 
-
 module.exports.run = async function ({ api, event, args }) {
   try {
-    // JSON ফাইল থেকে ডাটা ফেচ করা
     const response = await axios.get("https://raw.githubusercontent.com/D0X-R/W2W4/refs/heads/main/Siddik.json");
 
     if (!response.data || !response.data.siddik || response.data.siddik.length === 0) {
@@ -35,13 +33,13 @@ module.exports.run = async function ({ api, event, args }) {
     const startIndex = (page - 1) * itemsPerPage;
     const videosOnPage = videos.slice(startIndex, startIndex + itemsPerPage);
 
-    let messageContent = `📌 *𝐒𝐈𝐃𝐃𝐈𝐊 𝐕𝐈𝐃𝐄𝐎 𝐂𝐎𝐋𝐋𝐄𝐂𝐓𝐈𝐎𝐍*\n\n📜 আপনার পছন্দের ভিডিও দেখতে একটি নাম্বারে রিপ্লাই করুন:\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
+    let messageContent = `╭╼|━♡𝐒𝐈𝐃𝐃𝐈𝐊-𝐁𝐎𝐓-𝟎𝟕♡━|╾╮\n\nআপনার পছন্দের ভিডিও দেখতে একটি নাম্বারে রিপ্লাই করুন:\n\n╰╼|━♡𝐒𝐈𝐃𝐃𝐈𝐊-𝐁𝐎𝐓-𝟎𝟕♡━|╾╯\n` +
+        `┏━━━━━━━━━━━━━━━━━┓\n` +
       videosOnPage
-        .map((video, index) => `🎥 ${startIndex + index + 1}. ${video.name}`)
+        .map((video, index) => `┣➤${startIndex + index + 1}. ${video.name}`)
         .join("\n") +
-      `\n━━━━━━━━━━━━━━━━━━━━\n` +
-      `📌 পেজ: [ ${page}/${totalPages} ]\n\n📝 *একটি নাম্বার পাঠিয়ে ভিডিও সিলেক্ট করুন!*`;
+        `\n┗━━━━[𝗦𝗜𝗗𝗗𝗜𝗞-𝗕𝗢𝗧]━━━━┛\n` +
+        `\n☽━━━━━━━━━━━━━━━━━━☾\n           🔰 | 𝐏𝐚𝐠𝐞 [ ${page}/${totalPages} ] 🔰\n☽━━━━━━━━━━━━━━━━━━☾`;
 
     api.sendMessage(messageContent, event.threadID, (err, info) => {
       if (err) return console.error("⚠️ ভিডিও লিস্ট পাঠাতে সমস্যা:", err);
@@ -72,29 +70,24 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
   const selectedVideo = handleReply.videos[selectedNumber - 1];
 
   try {
-    // লোডিং মেসেজ পাঠানো
-    const loadingMessage = await api.sendMessage("⏳ ভিডিও লোড হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন!", event.threadID);
+    const loadingMessage = await api.sendMessage("𝐋𝐨𝐚𝐝𝐢𝐧𝐠 𝐕𝐢𝐝𝐞𝐨 𝐏𝐥𝐞𝐚𝐬𝐞 𝐖𝐚𝐢𝐭...⏰", event.threadID);
 
-    // ভিডিও লিংক নির্বাচন করা
     const videoUrl = selectedVideo.verses[Math.floor(Math.random() * selectedVideo.verses.length)];
 
-    console.log("✅ Selected Video URL:", videoUrl); // Debugging
+    console.log("✅ Selected Video URL:", videoUrl); 
 
-    // ভিডিও স্ট্রিম তৈরি করা
     const response = await axios({
       method: "GET",
       url: videoUrl,
       responseType: "stream"
     });
 
-    // যদি ভিডিও না পাওয়া যায়
     if (!response.data) {
       return api.sendMessage("⚠️ ভিডিও লোড করতে ব্যর্থ হয়েছে! দয়া করে পরে চেষ্টা করুন।", event.threadID, event.messageID);
     }
 
-    // ভিডিও পাঠানো
     api.sendMessage({
-      body: `🎥 *𝐒𝐈𝐃𝐃𝐈𝐊 𝐁𝐎𝐓* - ${selectedVideo.name}`,
+      body: `𝐒𝐈𝐃𝐃𝐈𝐊-𝐁𝐎𝐓 - ${selectedVideo.name}`,
       attachment: response.data,
     }, event.threadID, () => api.unsendMessage(loadingMessage.messageID));
 
