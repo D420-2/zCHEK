@@ -32,7 +32,6 @@
         "fs": "^0.0.1-security",
         "fs-extra": "^10.0.1",
         "gif-frames": "^1.0.1",
-        "ffmpeg-static",
         "gifencoder": "^2.0.1",
         "googlethis": "^1.7.1",
         "gradient-string": "^2.0.2",
