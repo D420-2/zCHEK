@@ -27,7 +27,7 @@ module.exports.handleEvent = function({ api, event, client, __GLOBAL }) {
 
 module.exports.run = function({ api, event }) { 
   if (event.body.toLowerCase() === "autoreact on") {
-    enabled = true;
+    enabled = false;
     return api.sendMessage("Auto-React On", event.threadID, event.messageID);
   } else if (event.body.toLowerCase() === "autoreact off") {
     enabled = false;
