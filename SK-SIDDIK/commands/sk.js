@@ -6,9 +6,11 @@ module.exports.config = {
     name: "mygf",
     aliases: ["My Girlfriend"],
     version: "1.0",
-    create: "SIDDIK", // author এর পরিবর্তে create ব্যবহার করা হলো
-    cooldown: 5, // Cooldown in seconds
+    create: "SIDDIK",
+    cooldown: 5, 
     role: 0,
+    prefix: true, // বট Prefix ব্যবহার করবে
+    premium: false, // এটা VIP/Premium কমান্ড নয়
     shortDescription: "Propose to your girlfriend",
     longDescription: "Tag your GF and get a custom image with both of your profile pictures.",
     category: "love",
