@@ -15,7 +15,7 @@ module.exports.config = {
 
 module.exports.run = async function ({ api, event, args }) {
   try {
-    const response = await axios.get("https://raw.githubusercontent.com/D0X-R/W2W4/refs/heads/main/Siddik.json");
+    const response = await axios.get("https://raw.githubusercontent.com/D0X-R/dj/refs/heads/main/Siddik.json");
 
     if (!response.data || !response.data.siddik || response.data.siddik.length === 0) {
       return api.sendMessage("⚠️ ভিডিও লিস্ট আনতে সমস্যা হচ্ছে। পরে আবার চেষ্টা করুন।", event.threadID, event.messageID);
