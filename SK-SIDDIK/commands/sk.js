@@ -1,61 +1,66 @@
-const axios = require('axios');
+const fs = require("fs-extra");
+const axios = require("axios");
 const jimp = require("jimp");
-const fs = require("fs");
 
 module.exports.config = {
-    name: "mygf",
-    aliases: ["My Girlfriend"],
-    version: "1.0",
-    create: "SIDDIK",
-    cooldown: 5, 
-    role: 0,
-    prefix: true, // বট Prefix ব্যবহার করবে
-    premium: false, // এটা VIP/Premium কমান্ড নয়
-    shortDescription: "Propose to your girlfriend",
-    longDescription: "Tag your GF and get a custom image with both of your profile pictures.",
-    category: "love",
-    guide: "{pn} @tag"
+  name: "mygf",
+  version: "1.0.0",
+  permission: 0,
+  credits: "SIDDIK",
+  description: "Frame pic",
+  prefix: true,
+  premium: false,
+  category: "png",
+  usages: "[@mention]",
+  cooldowns: 5,
+  dependencies: {
+    "request": "",
+    "fs-extra": "",
+    "axios": "",
+    "jimp": ""
+  }
 };
 
-module.exports.run = async function ({ api, event }) {
+module.exports.run = async ({ event, api, args }) => {
+  try {
     const mention = Object.keys(event.mentions);
+    
     if (mention.length === 0) {
-        return api.sendMessage("🔰 Please mention your girlfriend 🔰", event.threadID, event.messageID);
+      return api.sendMessage("🔰 Please Mention Your GF 🔰", event.threadID, event.messageID);
     }
 
-    let one, two;
-    if (mention.length === 1) {
-        one = event.senderID;
-        two = mention[0];
-    } else {
-        one = mention[1];
-        two = mention[0];
-    }
+    const one = mention.length === 1 ? event.senderID : mention[1];
+    const two = mention[0];
 
-    try {
-        const imagePath = await createImage(one, two);
-        api.sendMessage({
-            body: "⊙────𝚆𝙴𝙻𝙲𝙾𝙼𝙴 𝙼𝚈 𝙶𝙵────⊙",
-            attachment: fs.createReadStream(imagePath)
-        }, event.threadID, () => fs.unlinkSync(imagePath), event.messageID);
-    } catch (error) {
-        console.error(error);
-        api.sendMessage("❌ An error occurred while processing your request.", event.threadID, event.messageID);
-    }
+    const imagePath = await generateImage(one, two);
+
+    api.sendMessage({
+      body: "⊙────𝚆𝙴𝙻𝙲𝙾𝙼𝙴 𝙼𝚈 𝙶𝙵────⊙",
+      attachment: fs.createReadStream(imagePath)
+    }, event.threadID, () => {
+      fs.unlinkSync(imagePath); // Delete the file after sending
+    });
+
+  } catch (error) {
+    console.error(error);
+    api.sendMessage("❌ An error occurred while processing the image.", event.threadID);
+  }
 };
 
-async function createImage(one, two) {
-    const avone = await jimp.read(`https://graph.facebook.com/${one}/picture?width=512&height=512`);
-    avone.circle();
-    const avtwo = await jimp.read(`https://graph.facebook.com/${two}/picture?width=512&height=512`);
-    avtwo.circle();
+async function generateImage(one, two) {
+  const avOne = await jimp.read(`https://graph.facebook.com/${one}/picture?width=512&height=512`);
+  const avTwo = await jimp.read(`https://graph.facebook.com/${two}/picture?width=512&height=512`);
 
-    const img = await jimp.read("https://i.imgur.com/kKlTenx.jpeg");
-    img.resize(1280, 716)
-        .composite(avone.resize(360, 360), 130, 200)
-        .composite(avtwo.resize(360, 360), 787, 200);
+  avOne.circle();
+  avTwo.circle();
 
-    const imagePath = `./cache/mygf_${one}_${two}.jpg`;
-    await img.writeAsync(imagePath);
-    return imagePath;
+  const image = await jimp.read("https://i.imgur.com/kKlTenx.jpeg");
+  image.resize(1280, 716)
+       .composite(avOne.resize(360, 360), 130, 200)
+       .composite(avTwo.resize(360, 360), 787, 200);
+
+  const filePath = "./temp/mygf.jpg";
+  await image.writeAsync(filePath);
+
+  return filePath;
 }
