@@ -2,8 +2,8 @@ const axios = require("axios");
 
 module.exports.config = {
   name: "album",
-  version: "1.0.1",
-  permission: 0,
+  version: "1.0.0",
+  permisson: 0,
   credits: "SK-SIDDIK-KHAN",
   description: "ভিডিও লিস্ট দেখুন এবং বেছে নিন",
   prefix: true,
@@ -23,9 +23,9 @@ module.exports.run = async function ({ api, event, args }) {
 
     const videos = response.data.siddik;
     const itemsPerPage = 10;
+    const page = parseInt(args[0]) || 1;
     const totalPages = Math.ceil(videos.length / itemsPerPage);
-    
-    let page = parseInt(args[0]) || 1;
+
     if (page < 1 || page > totalPages) {
       return api.sendMessage(`❌ অবৈধ পেজ নম্বর! 1 থেকে ${totalPages} এর মধ্যে একটি পেজ নম্বর দিন।`, event.threadID, event.messageID);
     }
@@ -36,7 +36,7 @@ module.exports.run = async function ({ api, event, args }) {
     let messageContent = `╭╼|━♡𝐒𝐈𝐃𝐃𝐈𝐊-𝐁𝐎𝐓-𝟎𝟕♡━|╾╮\n\nআপনার পছন্দের ভিডিও দেখতে একটি নাম্বারে রিপ্লাই করুন:\n\n╰╼|━♡𝐒𝐈𝐃𝐃𝐈𝐊-𝐁𝐎𝐓-𝟎𝟕♡━|╾╯\n` +
         `┏━━━━━━━━━━━━━━━━━┓\n` +
       videosOnPage
-        .map((video, index) => `┣➤ ${startIndex + index + 1}. ${video.name}`)
+        .map((video, index) => `┣➤${startIndex + index + 1}. ${video.name}`)
         .join("\n") +
         `\n┗━━━━[𝗦𝗜𝗗𝗗𝗜𝗞-𝗕𝗢𝗧]━━━━┛\n` +
         `\n☽━━━━━━━━━━━━━━━━━━☾\n           🔰 | 𝐏𝐚𝐠𝐞 [ ${page}/${totalPages} ] 🔰\n☽━━━━━━━━━━━━━━━━━━☾`;
@@ -48,7 +48,7 @@ module.exports.run = async function ({ api, event, args }) {
         name: "album",
         messageID: info.messageID,
         author: event.senderID,
-        videos: videosOnPage
+        videos: videos
       });
     });
 
@@ -74,7 +74,7 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
 
     const videoUrl = selectedVideo.verses[Math.floor(Math.random() * selectedVideo.verses.length)];
 
-    console.log("✅ Selected Video URL:", videoUrl);
+    console.log("✅ Selected Video URL:", videoUrl); 
 
     const response = await axios({
       method: "GET",
