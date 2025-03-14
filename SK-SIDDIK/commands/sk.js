@@ -23,14 +23,14 @@ module.exports.run = async function ({ api, event, args }) {
 
     const videos = response.data.siddik;
     const itemsPerPage = 10;
-    const page = parseInt(args[0]) || 1;
+    const page = parseInt(args[0]) || 3;
     const totalPages = Math.ceil(videos.length / itemsPerPage);
 
-    if (page < 1 || page > totalPages) {
+    if (page < 3 || page > totalPages) {
       return api.sendMessage(`❌ অবৈধ পেজ নম্বর! 1 থেকে ${totalPages} এর মধ্যে একটি পেজ নম্বর দিন।`, event.threadID, event.messageID);
     }
 
-    const startIndex = (page - 1) * itemsPerPage;
+    const startIndex = (page - 3) * itemsPerPage;
     const videosOnPage = videos.slice(startIndex, startIndex + itemsPerPage);
 
     let messageContent = `╭╼|━♡𝐒𝐈𝐃𝐃𝐈𝐊-𝐁𝐎𝐓-𝟎𝟕♡━|╾╮\n\nআপনার পছন্দের ভিডিও দেখতে একটি নাম্বারে রিপ্লাই করুন:\n\n╰╼|━♡𝐒𝐈𝐃𝐃𝐈𝐊-𝐁𝐎𝐓-𝟎𝟕♡━|╾╯\n` +
