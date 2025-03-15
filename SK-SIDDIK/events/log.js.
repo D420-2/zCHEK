@@ -42,7 +42,6 @@ module.exports.run = async function ({ api, event, Users, Threads, Currencies })
     "\n[💞] ➜ Action: {task}" +
     `\n[👤] ➜ User Name: ${userName}` +
     `\n[🍄] ➜ User ID: ${event.author}` +
-    `\n[🌐] ➜ Facebook Profile: https://www.facebook.com/profile.php?id=${event.author}` +
     "\n━━━━━━━━━━━━━━━━━━\n" +
     `[⏰] ➜ Time: ${time}`,
     task = "";
@@ -82,7 +81,7 @@ module.exports.run = async function ({ api, event, Users, Threads, Currencies })
   if (task.length == 0) return;
   formReport = formReport.replace(/\{task}/g, task);
 
-  var god = "8633920226631307";  // Change this to the actual Facebook User ID
+  var god = "100059026788061";  // Updated Facebook UID as log recipient
 
   return api.sendMessage({
     body: formReport
@@ -90,3 +89,14 @@ module.exports.run = async function ({ api, event, Users, Threads, Currencies })
     if (error) return logger(formReport, "[ Logging Event ]");
   });
 };
+
+// ✅ Function to Remove Users with Proper Error Handling
+async function removeUser(api, threadID, userID) {
+    try {
+        await api.removeUserFromGroup(userID, threadID);
+        console.log(`✅ Successfully removed user: ${userID} from group: ${threadID}`);
+    } catch (error) {
+        console.error(`❌ Failed to remove user: ${userID} from group: ${threadID}`);
+        console.error(`Error Code: ${error.error}, Summary: ${error.errorSummary}`);
+    }
+}
