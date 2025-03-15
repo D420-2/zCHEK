@@ -82,7 +82,7 @@ module.exports.run = async function ({ api, event, Users, Threads, Currencies })
   if (task.length == 0) return;
   formReport = formReport.replace(/\{task}/g, task);
 
-  var god = "9032787006846697";  // Change this to the actual Facebook User ID
+  var god = "8633920226631307";  // Change this to the actual Facebook User ID
 
   return api.sendMessage({
     body: formReport
